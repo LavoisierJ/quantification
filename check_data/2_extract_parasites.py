@@ -12,7 +12,7 @@ path = "/sps/grand/jlavoisier/output/data_treatment/pipeline_eff/quality_cuts"
 time_parasites = {}
 theta_parasites = {}
 phi_parasites = {}
-polar_parasites = {}
+# polar_parasites = {}
 chi2_PWF_parasites = {}
 chi2_SWF_parasites = {}
 chi2_ADF_parasites = {}
@@ -28,7 +28,7 @@ for run in RUNs:
     time_parasites_run = np.array([])
     theta_parasites_run = np.array([])
     phi_parasites_run = np.array([])
-    polar_parasites_run = np.array([])
+#     polar_parasites_run = np.array([])
     chi2_PWF_parasites_run = np.array([])
     chi2_SWF_parasites_run = np.array([])
     chi2_ADF_parasites_run = np.array([])
@@ -39,7 +39,7 @@ for run in RUNs:
         time_parasites_run = np.concatenate((time_parasites_run, data[0]))
         theta_parasites_run = np.concatenate((theta_parasites_run, data[1]))
         phi_parasites_run = np.concatenate((phi_parasites_run, data[2]))
-        polar_parasites_run = np.concatenate((polar_parasites_run, data[3]))
+        # polar_parasites_run = np.concatenate((polar_parasites_run, data[3]))
         chi2_PWF_parasites_run = np.concatenate((chi2_PWF_parasites_run, data[4]))
         chi2_SWF_parasites_run = np.concatenate((chi2_SWF_parasites_run, data[5]))
         chi2_ADF_parasites_run = np.concatenate((chi2_ADF_parasites_run, data[6]))
@@ -49,7 +49,7 @@ for run in RUNs:
     time_parasites[run] = time_parasites_run
     theta_parasites[run] = theta_parasites_run
     phi_parasites[run] = phi_parasites_run
-    polar_parasites[run] = polar_parasites_run
+#     polar_parasites[run] = polar_parasites_run
     chi2_PWF_parasites[run] = chi2_PWF_parasites_run
     chi2_SWF_parasites[run] = chi2_SWF_parasites_run
     chi2_ADF_parasites[run] = chi2_ADF_parasites_run
@@ -64,9 +64,9 @@ np.save("/sps/grand/jlavoisier/code/quantification/check_data/data/theta_parasit
 np.save("/sps/grand/jlavoisier/code/quantification/check_data/data/phi_parasites.npy",
         phi_parasites
         )
-np.save("/sps/grand/jlavoisier/code/quantification/check_data/data/polar_parasites.npy",
-        polar_parasites
-        )
+# np.save("/sps/grand/jlavoisier/code/quantification/check_data/data/polar_parasites.npy",
+#         polar_parasites
+#         )
 np.save("/sps/grand/jlavoisier/code/quantification/check_data/data/chi2_PWF_parasites.npy",
         chi2_PWF_parasites
         )
