@@ -163,30 +163,38 @@ def pass_threshold(list_traces,
 
 
 
-repert_sims = sorted(glob('/sps/grand/DC2.1rc4/GP*ZHAireS-AN/*/adc_*_L1_0000.root'))[:50]
-repert_shower = sorted(glob('/sps/grand/DC2.1rc4/GP*ZHAireS-AN/*/shower_*_L0_0000.root'))[:50]
+repert_sims = sorted(glob('/sps/grand/DC2.1rc4/GP289ZHAireS-NJ/*/adc_*_L1_0000.root'))
+repert_shower = sorted(glob('/sps/grand/DC2.1rc4/GP289ZHAireS-NJ/*/shower_*_L0_0000.root'))
+repert_showersim = sorted(glob('/sps/grand/DC2.1rc4/GP289ZHAireS-NJ/*/showersim_*_L0_0000.root'))
+
 
 theta = np.array([])
 phi = np.array([])
 energy = np.array([])
 n_ant_trig = np.array([])
+n_tested_core = np.array([])
 
 for i in range(len(repert_sims)) :
     print("Processing file ", i+1, " / ", len(repert_sims))
     print("ADC file : ", repert_sims[i])
     print("Shower file : ", repert_shower[i])
+    print("ShowerSim file : ", repert_showersim[i])
 
     file_sims = dh.DataFile(repert_sims[i])
     file_shower = dh.DataFile(repert_shower[i])
+    file_showersim = dh.DataFile(repert_showersim[i])
+
     adc = file_sims.tadc
     shower = file_shower.tshower
+    showersim = file_showersim.tshowersim
+
     n_event_i = adc.get_number_of_entries()
 
     for j in range(n_event_i) :
-        # print("Event ", j+1, " / ", n_event_i)
 
         adc.get_entry(j)
         shower.get_entry(j)
+        showersim.get_entry(j)
         # print("Theta : ", shower.zenith, " -- Phi : ", shower.azimuth)
 
         # measure the EW component of the voltage for this event, for each antenna that detected it, and save it for the maximum SNR value among all antennas
@@ -201,6 +209,7 @@ for i in range(len(repert_sims)) :
 
             if pass_threshold(list_traces[k]) :
                 valid_ant = np.append(valid_ant, k)
+            
         
         # if len(valid_ant) < 5 : # We want to have at least 5 ant that were triggered
         #     continue
@@ -209,12 +218,14 @@ for i in range(len(repert_sims)) :
         phi = np.append(phi, shower.azimuth)
         n_ant_trig = np.append(n_ant_trig, len(valid_ant))
         energy = np.append(energy, shower.energy_primary)
+        n_tested_core = np.append(n_tested_core, np.shape(showersim.tested_cores)[0]) # number of tested cores for this event
+        print("Shapes of arrays : ", len(theta), len(phi), len(n_ant_trig), len(energy), len(n_tested_core))
     print("Number of events processed : ", len(theta))
 
 print("Number of events processed : ", len(theta))
-np.save("/sps/grand/jlavoisier/code/quantification/check_sims/out_files/simsAN_theta_phi_nant_energy.npy", np.array([theta, phi, n_ant_trig, energy]))
+np.save("/sps/grand/jlavoisier/code/quantification/check_sims/out_files/simsGP289AN_theta_phi_nant_energy_ntestedcore.npy", np.array([theta, phi, n_ant_trig, energy, n_tested_core]))
 
-with open("/sps/grand/jlavoisier/code/quantification/check_sims/out_files/simsAN_specs.txt", "w") as f :
+with open("/sps/grand/jlavoisier/code/quantification/check_sims/out_files/simsGP289AN_specs.txt", "w") as f :
     f.write("Sim files used for the study : \n")
     for file in repert_sims :
         f.write(file + "\n")

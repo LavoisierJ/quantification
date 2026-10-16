@@ -1,6 +1,6 @@
 """
 
-Gather the time of detection and the reconstructed zenith and azimuth of the events in different runs.
+Gather the time of detection and the reconstructed parameters of the events in different runs.
 
 """
 
