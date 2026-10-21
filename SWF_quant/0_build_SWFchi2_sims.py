@@ -309,7 +309,7 @@ for i in range(len(AN_file)):
     adc_NJ = file_NJ.tadc
     run = file_run.trun
     shower = file_shower.tshower
-    run.get_run(0)
+    run.get_run(1)
     n_event_i = adc.get_number_of_entries()
 
     for j in range(n_event_i) :

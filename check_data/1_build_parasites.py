@@ -75,7 +75,7 @@ def polarization(list_trace,
     else :
         scalar_product = 2
 
-    return(scalar_product)
+    return(np.abs(scalar_product))
 
 # -------------------------------------------------------------
 
@@ -325,12 +325,12 @@ def treat_one_event(root_file_CD,
 
     # ak.to_json(ak.Array([event]), f"{write_path}/event_{index}.json")
 
-    return(timing, np.array([theta, phi]), med_polar, chi2_pwf_reduced, chi2_swf_reduced, chi2_adf_reduced, t_PWF, t_SWF, t_ADF)
+    return(timing, np.array([theta_adf, phi_adf]), med_polar, chi2_pwf_reduced, chi2_swf_reduced, chi2_adf_reduced, t_PWF, t_SWF, t_ADF)
 
 
 
 
-write_path = f'/sps/grand/jlavoisier/output/data_treatment/pipeline_eff/quality_cuts/{fname}'
+write_path = f'/sps/grand/jlavoisier/output/data_treatment/pipeline_eff/quality_cuts/selection_2/{fname}'
 os.makedirs(write_path, exist_ok=True)
 
 file_root = dh.DataFile(file)
@@ -341,6 +341,7 @@ print('--------------------------------------------------------------------')
 
 list_antennas_xyz = np.loadtxt(antenna_path, dtype=np.float32)
 
+n_ant_list = np.array([])
 time_of_trigger = np.array([])
 polar_list = np.array([])
 chi2_PWF_list = np.array([])
@@ -358,10 +359,12 @@ nb_events = file_root.tadc.get_entries()
 for i in range(nb_events):
 # for i in range(5):
     try :
-        timing, direction, med_polar, chi2_PWF, chi2_SWF, chi2_ADF, t_PWF, t_SWF, t_ADF = treat_one_event(file_root, 
-                                                                                        i, 
-                                                                                        list_antennas_xyz
-                                                                                        )
+        n_ant, timing, direction, med_polar, chi2_PWF, chi2_SWF, chi2_ADF, t_PWF, t_SWF, t_ADF = treat_one_event(file_root, 
+                                                                                                i, 
+                                                                                                list_antennas_xyz
+                                                                                                )
+
+        n_ant_list = np.append(n_ant_list, n_ant)
         chi2_PWF_list = np.append(chi2_PWF_list, chi2_PWF)
         chi2_SWF_list = np.append(chi2_SWF_list, chi2_SWF)
         chi2_ADF_list = np.append(chi2_ADF_list, chi2_ADF)
@@ -385,7 +388,8 @@ print(f"Total time for PWF: {np.sum(t_PWF_list):.2f} s")
 print(f"Total time for SWF: {np.sum(t_SWF_list):.2f} s")
 print(f"Total time for ADF: {np.sum(t_ADF_list):.2f} s")
 
-np.save(f"{write_path}/chi2_list.npy", np.array([time_of_trigger, 
+np.save(f"{write_path}/chi2_list.npy", np.array([n_ant_list, 
+                                                 time_of_trigger, 
                                                  theta_list, 
                                                  phi_list, 
                                                  polar_list, 

@@ -1,12 +1,12 @@
 #!/bin/bash
 # Path to the directory containing the files
 # ZHAiReS 
-dir_path_AN="/sps/grand/DC2.1rc4/GP300ZHAireS-AN"
-dir_path_NJ="/sps/grand/DC2.1rc4/GP300ZHAireS-NJ"
+# dir_path_AN="/sps/grand/DC2.1rc4/GP289ZHAireS-AN"
+# dir_path_NJ="/sps/grand/DC2.1rc4/GP289ZHAireS-NJ"
 
 # #Coreas
-# dir_path_AN="/sps/grand/DC2_Coreas/RFChain_v2/COREAS-AN"
-# dir_path_NJ="/sps/grand/DC2_Coreas/Coreas_nonoise"
+dir_path_AN="/sps/grand/DC2_Coreas/RFChain_v2/COREAS-AN"
+dir_path_NJ="/sps/grand/DC2_Coreas/Coreas_nonoise"
 
 
 # Directory for the output .out files of the SLURM jobs
@@ -25,7 +25,7 @@ if [ ! -d "$dir_path_NJ" ]; then
 fi
 
 # Number of files to process
-n=100
+n=150
 
 # Get the list of files
 mapfile -t listeoffiles_AN < <(ls "$dir_path_AN" | grep -E 'CD')
@@ -35,7 +35,7 @@ listeoffiles_NJ=("${listeoffiles_NJ[@]:0:n}") # Take the first n files
 
 
 # Files per job
-files_per_job=2
+files_per_job=5
 
 # Calculate the number of jobs
 num_jobs=$(( (${#listeoffiles_AN[@]} + files_per_job - 1) / files_per_job ))

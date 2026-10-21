@@ -1,8 +1,12 @@
 #!/bin/bash
 # Path to the directory containing the files
-dir_path_AN="/sps/grand/DC2.1rc4/GP300ZHAireS-AN"
-dir_path_NJ="/sps/grand/DC2.1rc4/GP300ZHAireS-NJ"
+# dir_path_AN="/sps/grand/DC2.1rc4/GP300ZHAireS-AN"
+# dir_path_NJ="/sps/grand/DC2.1rc4/GP300ZHAireS-NJ"
 
+
+# #Coreas
+dir_path_AN="/sps/grand/DC2_Coreas/RFChain_v2/COREAS-AN"
+dir_path_NJ="/sps/grand/DC2_Coreas/Coreas_nonoise"
 
 # Directory for the output .out files of the SLURM jobs
 output_dir_out="/sps/grand/jlavoisier/code/quantification/ADF_quant/out_files/batch/out"
@@ -20,7 +24,7 @@ if [ ! -d "$dir_path_NJ" ]; then
 fi
 
 # Number of files to process
-n=100
+n=150
 
 # Get the list of files
 mapfile -t listeoffiles_AN < <(ls "$dir_path_AN" | grep -E 'CD')
@@ -30,7 +34,7 @@ listeoffiles_NJ=("${listeoffiles_NJ[@]:0:n}") # Take the first n files
 
 
 # Files per job
-files_per_job=1
+files_per_job=5
 
 # Calculate the number of jobs
 num_jobs=$(( (${#listeoffiles_AN[@]} + files_per_job - 1) / files_per_job ))
@@ -63,7 +67,7 @@ for ((job=0; job<num_jobs; job++)); do
         file_NJ="${job_files_NJ[$i]}"
         full_path_AN="$dir_path_AN/$file_AN"
         full_path_NJ="$dir_path_NJ/$file_NJ"
-        echo "python /sps/grand/jlavoisier/code/quantification/ADF_quant/build_ADFchi2_sims.py $full_path_AN $full_path_NJ" >> "$job_name"
+        echo "python /sps/grand/jlavoisier/code/quantification/ADF_quant/0_build_ADFchi2_sims.py $full_path_AN $full_path_NJ" >> "$job_name"
     done
 
     # Submit the job

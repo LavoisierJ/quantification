@@ -16,6 +16,9 @@ def extract_and_measure_observation_time(directory):
     # Step 1: Find all files matching the patterns (full paths)
     files = glob.glob(f"{directory}/*CD*-*dus-*.*") + glob.glob(f"{directory}/*CD*-*DUs-*.*")
 
+    # Additional step:Exclude files containing "testNutrig" in their name
+    files = [f for f in files if 'testNutrig' not in basename(f)]
+
     # Step 2: Filter files where the number in ** is > 50
     filtered_files = []
     for file in files:
@@ -73,11 +76,17 @@ def extract_and_measure_observation_time(directory):
 
 
 
-months = np.array(['07', '08', '09', '10', 
-                #    '11', '12', '01', '02', '03', '04', '06'
+months = np.array([
+                    # '07', '08', '09', '10', 
+                    # '11', '12', '01', '02', '03', '04', 
+                    '06', '07', '08', '09', 
+                    # '10'
                    ])
-years = np.array(['2025', '2025', '2025', '2025', 
-                #   '2025', '2025', '2026', '2026', '2026', '2026', '2026'
+years = np.array([
+                    # '2025', '2025', '2025', '2025', # selection_1
+                    # '2025', '2025', '2026', '2026', '2026', '2026', 
+                    '2026', '2026', '2026', '2026', # selection_2
+                    # '2026'
                   ])
 
 filtered_files = np.array([], dtype='str')
@@ -97,12 +106,12 @@ print(f"Observation time in days: {sum(observation_times.values()) / 86400} days
 print(f"Total number of filtered files: {len(filtered_files)}")
 
 
-with open("/pbs/home/j/jlavoisier/pipeline_lab/check_data/filtered_files.txt", "w") as f:
+with open("/sps/grand/jlavoisier/code/quantification/check_data/filtered_files.txt", "w") as f:
     for filename in filtered_files:
         f.write(f"{filename}\n")
 
-# np.save(f"/pbs/home/j/jlavoisier/pipeline_lab/check_data/filtered_files.npy", filtered_files)
-np.save(f"/pbs/home/j/jlavoisier/pipeline_lab/check_data/observation_times.npy", observation_times)
+# np.save(f"/sps/grand/jlavoisier/code/quantification/check_data/filtered_files.npy", filtered_files)
+np.save(f"/sps/grand/jlavoisier/code/quantification/check_data/observation_times.npy", observation_times)
 
 # test = np.load(f"/pbs/home/j/jlavoisier/pipeline_lab/check_data/filtered_files.npy", allow_pickle=True)
 # test = np.load(f"/pbs/home/j/jlavoisier/pipeline_lab/check_data/observation_times.npy", allow_pickle=True).item()

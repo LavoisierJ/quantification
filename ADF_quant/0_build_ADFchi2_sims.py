@@ -6,6 +6,7 @@ This is done by counting the number of antennas that are triggered for each zeni
 import grand.dataio.data_handling as dh
 import grand.analysis.fitting as fit
 import grand.analysis.signals.extraction as ext
+import grand.analysis.constants as cons
 
 import numpy as np
 import sys
@@ -13,7 +14,7 @@ from glob import glob
 from scipy.signal import hilbert
 
 
-array_dus = np.int32(np.loadtxt("/pbs/home/j/jlavoisier/pipeline_lab/check_sims/gp65_correspondance_ID_febID.txt").T) # so that it starts at 0 (ie use it for simulations)
+array_dus = np.int32(np.loadtxt("/sps/grand/jlavoisier/code/quantification/check_sims/gp65_correspondance_ID_febID.txt").T) # so that it starts at 0 (ie use it for simulations)
 array_dus[0] = array_dus[0] - 65000 - 1
 
 
@@ -282,7 +283,9 @@ NJ_file = sorted(glob(f"{sys.argv[2]}/adc_*_L1_0000.root"))
 shower_file = sorted(glob(f"{sys.argv[2]}/shower_*.root"))
 
 
-chi2 = np.array([])
+chi2_pwf = np.array([])
+chi2_swf = np.array([])
+chi2_adf = np.array([])
 n_ant_trig = np.array([])
 theta_list = np.array([])
 phi_list = np.array([])
@@ -313,7 +316,7 @@ for i in range(len(AN_file)):
     adc_NJ = file_NJ.tadc
     run = file_run.trun
     shower = file_shower.tshower
-    run.get_run(0)
+    run.get_run(1)
     n_event_i = adc.get_number_of_entries()
 
     for j in range(n_event_i) :
@@ -375,6 +378,13 @@ for i in range(len(AN_file)):
 
 
         theta, phi = fit.PWF_semianalytical(x_ants, time_ant)
+        chi2_pwf_reduced = fit.PWF_loss((theta, phi), 
+                                        x_ants, 
+                                        time_ant, 
+                                        c=cons.c_light, 
+                                        n=cons.n_atm, 
+                                        sigma=5e-9)/(len(valid_ant) - 2)
+        
         theta_PWF = np.append(theta_PWF, theta)
         phi_PWF = np.append(phi_PWF, phi)
 
@@ -384,6 +394,14 @@ for i in range(len(AN_file)):
                                                                  x_ants, 
                                                                  sigma = 5e-9
                                                                  )
+        chi2_swf_reduced = fit.SWF_loss(theta_swf_rad, 
+                                                phi_swf_rad, 
+                                                r_xmax, 
+                                                t_s, 
+                                                x_ants, 
+                                                time_ant, 
+                                                sigma=5e-9)/(len(valid_ant) - 4)
+        
         Xsource = fit.compute_Xsource_cartesian_coords(theta_swf_rad, 
                                                        phi_swf_rad, 
                                                        r_xmax
@@ -409,18 +427,43 @@ for i in range(len(AN_file)):
                                         x_ants, 
                                         Xsource[0])/(len(time_ant) - 4)
 
-        theta_list = np.append(theta_list, theta_adf)
-        phi_list = np.append(phi_list, phi_adf)
-        chi2 = np.append(chi2, chi2_adf_reduced)
-        n_ant_trig = np.append(n_ant_trig, len(valid_ant))
+        theta_list = np.append(theta_list, 
+                               theta_adf
+                               )
+        phi_list = np.append(phi_list, 
+                             phi_adf
+                             )
+        chi2_pwf = np.append(chi2_pwf, 
+                            chi2_pwf_reduced
+                            )
+        chi2_swf = np.append(chi2_swf, 
+                            chi2_swf_reduced
+                            )
+        chi2_adf = np.append(chi2_adf, 
+                         chi2_adf_reduced
+                         )
+        n_ant_trig = np.append(n_ant_trig, 
+                               len(valid_ant)
+                               )
     print("Number of events processed : ", len(n_ant_trig))
 
 
-print("Number of events processed : ", len(chi2))
-np.save(f"/pbs/home/j/jlavoisier/pipeline_lab/ADF_quant/out_files/batch/{AN_file[0].split('/')[-2].split('-')[-1]}_chi2_n_ant.npy", 
-        np.array([n_ant_trig, chi2, theta_list, phi_list, theta_true, phi_true]))
-np.save(f"/pbs/home/j/jlavoisier/pipeline_lab/zenith_quant/out_files/batch/{AN_file[0].split('/')[-2].split('-')[-1]}_theta_phi.npy", 
-        np.array([theta_PWF, phi_PWF, theta_SWF, phi_SWF, theta_list, phi_list, theta_true, phi_true]))
+print("Number of events processed : ", len(chi2_adf))
+np.save(f"/sps/grand/jlavoisier/code/quantification/ADF_quant/out_files/batch/COREAS/{AN_file[0].split('/')[-2].split('-')[-1]}_chi2_n_ant.npy", 
+        np.array([n_ant_trig, chi2_adf, theta_list, phi_list, theta_true, phi_true])
+        )
+np.save(f"/sps/grand/jlavoisier/code/quantification/ADF_quant/out_files/batch/COREAS/{AN_file[0].split('/')[-2].split('-')[-1]}_theta_phi.npy", 
+        np.array([theta_PWF, phi_PWF, theta_SWF, phi_SWF, theta_list, phi_list, theta_true, phi_true])
+        )
+
+
+np.save(f"/sps/grand/jlavoisier/code/quantification/SWF_quant/out_files/batch/COREAS/{AN_file[0].split('/')[-2].split('-')[-1]}_chi2_SWF_n_ant.npy", 
+        np.array([n_ant_trig, chi2_swf, theta_list, phi_list, theta_true, phi_true])
+        )
+np.save(f"/sps/grand/jlavoisier/code/quantification/PWF_quant/out_files/batch/COREAS/{AN_file[0].split('/')[-2].split('-')[-1]}_chi2_PWF_n_ant.npy", 
+        np.array([n_ant_trig, chi2_pwf, theta_list, phi_list, theta_true, phi_true])
+        )
+
 # np.save("/pbs/home/j/jlavoisier/pipeline_lab/ADF_quant/out_files/batch/simsAN_test.npy", np.array([n_ant_trig, chi2, theta_list, phi_list]))
 
 
