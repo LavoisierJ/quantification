@@ -24,7 +24,7 @@ if [ ! -d "$dir_path_NJ" ]; then
 fi
 
 # Number of files to process
-n=150
+n=300
 
 # Get the list of files
 mapfile -t listeoffiles_AN < <(ls "$dir_path_AN" | grep -E 'CD')

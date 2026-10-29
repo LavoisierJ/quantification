@@ -36,7 +36,7 @@ coord_origin = coord_DAQ
 sigma_time_antennas = 5 # in ns, timing error of antennas
 magnetic_field = np.array([26579.3, +34.0, - 50127.7])/np.linalg.norm(np.array([26579.3, +34.0, - 50127.7]))
 
-antenna_path = '/pbs/home/j/jlavoisier/flaginator/flaginator/basics/list_antennas_GP80_xyz_origin_0_rtk.txt'
+antenna_path = '/sps/grand/jlavoisier/code/quantification/check_data/list_antennas_GP80_xyz_origin_0_rtk.txt'
 
 
 if "512trace" in fname:
@@ -247,10 +247,12 @@ def treat_one_event(root_file_CD,
 
 
     timing = ref_sec
+    timing_ns = ref_ns
 
 
     polar_event = np.zeros(n_ant)
-    
+
+    t_0 = time.time()
     for i in range(n_ant) :
         polar_event[i] = np.abs(polarization(list_traces[i], 
                                       np.array([26579.3, +34.0, - 50127.7])/np.linalg.norm(np.array([26579.3, +34.0, - 50127.7]))))
@@ -316,6 +318,7 @@ def treat_one_event(root_file_CD,
     print('Chi2 delay ADF calculated.', chi2_adf_reduced)
 
     # ----
+    t_polar = t_1 - t_0
     t_PWF = t_2 - t_1
     t_SWF = t_3 - t_2
     t_ADF = t_4 - t_3
@@ -325,7 +328,16 @@ def treat_one_event(root_file_CD,
 
     # ak.to_json(ak.Array([event]), f"{write_path}/event_{index}.json")
 
-    return(timing, np.array([theta_adf, phi_adf]), med_polar, chi2_pwf_reduced, chi2_swf_reduced, chi2_adf_reduced, t_PWF, t_SWF, t_ADF)
+    return(n_ant, 
+           timing, 
+           timing_ns,
+           np.array([theta_adf, phi_adf]), 
+           med_polar, 
+           chi2_pwf_reduced,
+           chi2_swf_reduced, 
+           chi2_adf_reduced, 
+           t_polar, t_PWF, t_SWF, t_ADF
+           )
 
 
 
@@ -343,6 +355,7 @@ list_antennas_xyz = np.loadtxt(antenna_path, dtype=np.float32)
 
 n_ant_list = np.array([])
 time_of_trigger = np.array([])
+time_of_trigger_ns = np.array([])
 polar_list = np.array([])
 chi2_PWF_list = np.array([])
 chi2_SWF_list = np.array([])
@@ -350,6 +363,7 @@ chi2_ADF_list = np.array([])
 theta_list = np.array([])
 phi_list = np.array([])
 
+t_polar_list = np.array([])
 t_PWF_list = np.array([])
 t_SWF_list = np.array([])
 t_ADF_list = np.array([])
@@ -359,7 +373,7 @@ nb_events = file_root.tadc.get_entries()
 for i in range(nb_events):
 # for i in range(5):
     try :
-        n_ant, timing, direction, med_polar, chi2_PWF, chi2_SWF, chi2_ADF, t_PWF, t_SWF, t_ADF = treat_one_event(file_root, 
+        n_ant, timing, timing_ns, direction, med_polar, chi2_PWF, chi2_SWF, chi2_ADF, t_polar, t_PWF, t_SWF, t_ADF = treat_one_event(file_root, 
                                                                                                 i, 
                                                                                                 list_antennas_xyz
                                                                                                 )
@@ -372,8 +386,8 @@ for i in range(nb_events):
         phi_list = np.append(phi_list, direction[1])
         polar_list = np.append(polar_list, med_polar)
         time_of_trigger = np.append(time_of_trigger, timing)
-
-
+        time_of_trigger_ns = np.append(time_of_trigger_ns, timing_ns)
+        t_polar_list = np.append(t_polar_list, t_polar)
 
         t_PWF_list = np.append(t_PWF_list, t_PWF)
         t_SWF_list = np.append(t_SWF_list, t_SWF)
@@ -390,6 +404,7 @@ print(f"Total time for ADF: {np.sum(t_ADF_list):.2f} s")
 
 np.save(f"{write_path}/chi2_list.npy", np.array([n_ant_list, 
                                                  time_of_trigger, 
+                                                 time_of_trigger_ns,
                                                  theta_list, 
                                                  phi_list, 
                                                  polar_list, 
@@ -397,4 +412,5 @@ np.save(f"{write_path}/chi2_list.npy", np.array([n_ant_list,
                                                  chi2_SWF_list, 
                                                  chi2_ADF_list
                                                  ]))
-np.save(f"{write_path}/time_list.npy", np.array([t_PWF_list, t_SWF_list, t_ADF_list]))
+
+np.save(f"{write_path}/time_list.npy", np.array([t_polar_list, t_PWF_list, t_SWF_list, t_ADF_list]))

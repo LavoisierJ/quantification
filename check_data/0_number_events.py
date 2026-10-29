@@ -8,7 +8,7 @@ files = sorted(np.loadtxt(f"/sps/grand/jlavoisier/code/quantification/check_data
 nb_events = 0
 nb_events_per_month = {'06': 0, '07': 0, '08': 0, '09': 0}
 
-for filename in files:
+for i, filename in enumerate(files):
     month = filename.split('/')[-2]
     file_root = dh.DataFile(str(filename))
 
@@ -18,7 +18,9 @@ for filename in files:
 
     file_root.close()
 
-    print(f"File: {filename.split('/')[-1]}, Number of events: {file_root.tadc.get_entries()}")
+    if i % 5 == 0:
+        print(f"Processed {i} files.")
+        print("Number of events per month:", nb_events_per_month)
 
 print(f"Total number of events: {nb_events}")
 print(f"Number of events per month: {nb_events_per_month}")

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Directory for the output .out files of the SLURM jobs
-output_dir_out="/sps/grand/jlavoisier/output/data_treatment/pipeline_eff/quality_cuts/out"
+output_dir_out="/sps/grand/jlavoisier/output/data_treatment/pipeline_eff/quality_cuts/selection_2/out"
 mkdir -p "$output_dir_out"
 
 # Path to the temporary text file containing the list of files
@@ -12,15 +12,15 @@ mypath="/sps/grand/jlavoisier/code/quantification/check_data/filtered_files.txt"
 mapfile -t listeoffiles < "$mypath"
 
 # Number of files to process
-n=8000
+n=3000
 
 # Get the list of files
 # mapfile -t listeoffiles < <(ls "$dir_path" | grep -E 'CD') 
 # mapfile -t listeoffiles < <(ls "$dir_path" | grep -E 'CD.*51DUs') # if we want to process only the files with x DUs
-listeoffiles=("${listeoffiles[@]:16000:n}") # Take the first n files
+listeoffiles=("${listeoffiles[@]:0:n}") # Take the first n files
 
 # Files per job
-files_per_job=20
+files_per_job=15
 
 # Calculate the number of jobs
 num_jobs=$(( (${#listeoffiles[@]} + files_per_job - 1) / files_per_job ))
@@ -43,7 +43,7 @@ for ((job=0; job<num_jobs; job++)); do
 
     # Create the SLURM script
     echo "#!/bin/bash" > "$job_name"
-    echo "#SBATCH -t 7-00:00 -n 1 --mem 9G" >> "$job_name"
+    echo "#SBATCH -t 7-00:00 -n 1 --mem 12G" >> "$job_name"
     echo "#SBATCH -o $output_dir_out/batch_${job}.out" >> "$job_name"
 
     # Loop over the files in this batch

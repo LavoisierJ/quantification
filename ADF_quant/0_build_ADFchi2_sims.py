@@ -283,6 +283,7 @@ NJ_file = sorted(glob(f"{sys.argv[2]}/adc_*_L1_0000.root"))
 shower_file = sorted(glob(f"{sys.argv[2]}/shower_*.root"))
 
 
+
 chi2_pwf = np.array([])
 chi2_swf = np.array([])
 chi2_adf = np.array([])
@@ -319,6 +320,14 @@ for i in range(len(AN_file)):
     run.get_run(1)
     n_event_i = adc.get_number_of_entries()
 
+    # if not the same number of events in AN, NJ and shower files, raise an error
+    n_event_NJ = adc_NJ.get_number_of_entries()
+    if n_event_i != n_event_NJ:
+        raise ValueError(f"Number of events in AN file ({n_event_i}) and NJ file ({n_event_NJ}) do not match.")
+
+
+    print("Number of events in this file : ", n_event_i)
+
     for j in range(n_event_i) :
         # print("Event ", j+1, " / ", n_event_i)
 
@@ -350,7 +359,9 @@ for i in range(len(AN_file)):
             du_id = adc.du_id[int(GP65_indexes[k])]
 
             # if pass_T1(list_traces[k], du_id, correspondance=array_dus) :
-            if pass_threshold(list_traces_NJ[k], threshold=60) :
+            if pass_threshold(list_traces_NJ[k], 
+                              threshold=60
+                              ) :
                 valid_ant = np.append(valid_ant, int(GP65_indexes[k]))
                 Emodulus = np.sqrt(list_traces[k,0]**2+list_traces[k,1]**2+list_traces[k,2]**2)
                 hilbert_amp = np.abs(hilbert(Emodulus))
@@ -370,7 +381,7 @@ for i in range(len(AN_file)):
         time_seconds = time_seconds - time_seconds.min() # we set the minimum time to 0 for better precision in the next steps
         time_ant = time_seconds + time_nanoseconds*1e-9
         du_id = np.asarray(adc.du_id)[valid_ant]
-        print("Triggered antennas DU id : ", du_id)
+        # print("Triggered antennas DU id : ", du_id)
 
 
         du_indices = np.asarray(adc.get_dus_indices_in_run(run))[valid_ant]
@@ -449,6 +460,9 @@ for i in range(len(AN_file)):
 
 
 print("Number of events processed : ", len(chi2_adf))
+print(f"Saving to: /sps/grand/jlavoisier/code/quantification/ADF_quant/out_files/batch/COREAS/{AN_file[0].split('/')[-2].split('-')[-1]}_chi2_n_ant.npy")
+
+
 np.save(f"/sps/grand/jlavoisier/code/quantification/ADF_quant/out_files/batch/COREAS/{AN_file[0].split('/')[-2].split('-')[-1]}_chi2_n_ant.npy", 
         np.array([n_ant_trig, chi2_adf, theta_list, phi_list, theta_true, phi_true])
         )
@@ -460,7 +474,7 @@ np.save(f"/sps/grand/jlavoisier/code/quantification/ADF_quant/out_files/batch/CO
 np.save(f"/sps/grand/jlavoisier/code/quantification/SWF_quant/out_files/batch/COREAS/{AN_file[0].split('/')[-2].split('-')[-1]}_chi2_SWF_n_ant.npy", 
         np.array([n_ant_trig, chi2_swf, theta_list, phi_list, theta_true, phi_true])
         )
-np.save(f"/sps/grand/jlavoisier/code/quantification/PWF_quant/out_files/batch/COREAS/{AN_file[0].split('/')[-2].split('-')[-1]}_chi2_PWF_n_ant.npy", 
+np.save(f"/sps/grand/jlavoisier/code/quantification/SWF_quant/out_files/batch/COREAS/{AN_file[0].split('/')[-2].split('-')[-1]}_chi2_PWF_n_ant.npy", 
         np.array([n_ant_trig, chi2_pwf, theta_list, phi_list, theta_true, phi_true])
         )
 

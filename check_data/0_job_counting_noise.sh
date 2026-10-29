@@ -8,7 +8,7 @@
 #SBATCH --partition=htc          # Choix de partition (htc par défaut)
 
 #SBATCH --ntasks=1                    # Exécuter une seule tâche
-#SBATCH --mem=8000                    # Mémoire en MB par défaut
+#SBATCH --mem=20000                    # Mémoire en MB par défaut
 #SBATCH --time=2-00:00:00             # Délai max = 7 jours
 
 #SBATCH --mail-user=lavoisie@iap.fr   # Où envoyer l'e-mail
